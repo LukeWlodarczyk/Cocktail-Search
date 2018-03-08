@@ -1,7 +1,9 @@
 import { combineReducers } from "redux";
-import infoReducer from './infoReducer';
+import info from './infoReducer';
+import geocode from './geocodeReducer';
 
 const rootReducer=combineReducers({
-  info: infoReducer,
+  info,
+  geocode,
 })
 export default rootReducer;

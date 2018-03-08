@@ -1,18 +1,44 @@
 import { takeLatest, call, put, fork } from 'redux-saga/effects';
-import { GET_INFO_REQUESTED, GET_INFO_SUCCESS } from '../constants/action-types';
+import { GET_INFO_REQUESTED,
+          GET_INFO_SUCCESS,
+          GET_GEOCODE } from '../constants/action-types';
 import { getWeather, getWeather2, getWeather3 } from './apiCalls';
+import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import axios from 'axios';
 
+function* getGeocode(action) {
+  // yield put({type: GET_GEOCODE_REQUESTED);
+  // geocodeByAddress(action.payload)
+  //   .then(results => getLatLng(results[0]))
+  //   .then(({ lat, lng }) => {
+  //       // yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
+  //       console.log(lat, lng);
+  //   })
+  //   .catch( e => {
+  //     // yield put({type: GET_GEOCODE_SUCCESS, payload: geocode})
+  //   } )
 
+  const results = yield call(geocodeByAddress, action.payload)
+  const { lat, lng } = yield call(getLatLng, results[0])
+  console.log(lat, lng);
+}
 
-function gWeather(geocode) {
+function gWeatherGeocode(place) {
   const key = '36ebef955f1b49690a2bdb5e20d565b8';
   const opt = 'mode=json&units=metric';
-  const lat = geocode.lat;
-  const lon = geocode.lon;
+  const lat = place.lat;
+  const lon = place.lng;
   const url = `https://api.openweathermap.org/data/2.5/forecast?${opt}&lat=${lat}&lon=${lon}&appid=${key}`;
   return axios.get(url).then( res => res );
 }
+
+// function gWeatherName(place) {
+//   const key = '36ebef955f1b49690a2bdb5e20d565b8'
+//   const name = place.name
+//   const url =
+//     `https://api.openweathermap.org/data/2.5/forecast?mode=json&units=metric&APPID=${key}&q=${name}`
+//   return axios.get(url).then( res => res )
+// }
 
 
 
@@ -20,38 +46,43 @@ function* fetchAll(action) {
   console.log('fetchAll');
   console.log(action);
   yield fork(fetchWeather, action.payload);
-  yield fork(fetchWeather2, action.payload);
-  yield fork(fetchWeather3, action.payload);
+  // yield fork(fetchWeather2, action.payload);
+  // yield fork(fetchWeather3, action.payload);
 }
 
 
 
 function* fetchWeather(place) {
+  yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: false, isError: false }});
   console.log('weather');
   console.log('place', place);
-  const weather = yield call(getWeather, place)
-  yield put({type: GET_INFO_SUCCESS, payload: { weather }})
+  const weatherResult = yield call(gWeatherGeocode, place)
+  const weather = { data: weatherResult, isLoading: false }
+  // console.log('weather', weather.data.city.name, weather.data.city.country);
+  yield put({type: GET_INFO_SUCCESS, payload: { weather: weather, isLoading: false, isError: false }});
 }
 
-function* fetchWeather2(place) {
-  console.log('weather2');
-  const weather2 = yield call(getWeather2, place)
-  yield put({type: GET_INFO_SUCCESS, payload: { weather2 }})
-}
+// function* fetchWeather2(place) {
+//   console.log('weather2');
+//   console.log('place', place);
+//   const weather2 = yield call(gWeatherName, place)
+//   console.log('weather2', weather2.data.city.name, weather2.data.city.country);
+//   yield put({type: GET_INFO_SUCCESS, payload: { weather2 }})
+// }
 
-function* fetchWeather3(place) {
-  console.log('weather3');
-  const weather3 = yield call(getWeather3, place)
-  console.log('///////////', weather3);
-  yield put({type: GET_INFO_SUCCESS, payload: { weather3 }})
-}
+// function* fetchWeather3(place) {
+//   console.log('weather3');
+//   const weather3 = yield call(getWeather3, place)
+//   console.log('///////////', weather3);
+//   yield put({type: GET_INFO_SUCCESS, payload: { weather3 }})
+// }
 
 
 
 
 function* rootSaga() {
   console.log('rootSaga');
-  yield takeLatest(GET_INFO_REQUESTED, fetchAll);
+  yield takeLatest(GET_GEOCODE, getGeocode);
 }
 
 export default rootSaga;

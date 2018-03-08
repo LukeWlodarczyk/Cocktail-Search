@@ -1,9 +1,9 @@
-import { GET_INFO_REQUESTED } from '../constants/action-types';
+import { GET_GEOCODE } from '../constants/action-types';
 
-export const getInfo = place => {
+export const getGeocode = place => {
   console.log(place);
   return {
-    type: GET_INFO_REQUESTED,
+    type: GET_GEOCODE,
     payload: place,
   }
 }

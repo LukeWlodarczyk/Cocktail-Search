@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { getInfo } from "../actions/index.js";
-import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
+import { getGeocode } from "../actions/index.js";
+import PlacesAutocomplete from 'react-places-autocomplete';
 
 
 const mapStateToProps = state => {
@@ -15,33 +15,27 @@ class Form extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      place: '',
+      name: '',
     }
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { getInfo } = this.props;
-    geocodeByAddress(this.state.place)
-      .then(results => getLatLng(results[0]))
-      .then(({ lat, lng }) => getInfo({ lat, lng }))
-      .catch( e => console.log(e))
-
-    // getInfo(this.state.place);
+    const { name } = this.state;
+    this.props.getGeocode(name)
   }
 
-  handleChange = (place) => {
-    this.setState({ place })
+  handleChange = (name) => {
+    this.setState({ name })
   }
 
-  handleSelect = (place) => {
-    this.setState({ place })
+  handleSelect = (name) => {
+    this.setState({ name })
   }
 
-  handleEnter = (place) => {
-    this.setState({ place })
-    const { getInfo } = this.props;
-    getInfo(place);
+  handleEnter = (name) => {
+    this.setState({ name })
+    this.props.getGeocode(this.state.name)
   }
 
 
@@ -72,7 +66,7 @@ class Form extends Component {
     }
 
     const inputProps = {
-      value: this.state.place,
+      value: this.state.name,
       onChange: this.handleChange,
       type: 'search',
       placeholder: 'Search Places...',
@@ -111,7 +105,7 @@ class Form extends Component {
   }
 }
 
-const Form1 = connect(mapStateToProps, { getInfo })(Form);
+const Form1 = connect(mapStateToProps, { getGeocode })(Form);
 
 Form1.propTypes = {
 
