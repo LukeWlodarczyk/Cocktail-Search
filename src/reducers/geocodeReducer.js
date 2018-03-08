@@ -4,7 +4,7 @@ import { GET_GEOCODE_REQUESTED,
 
 
 const initialState = {
-  geocode: '',
+  geocode: {},
   isLoading: false,
   error: '',
 }
@@ -17,8 +17,8 @@ export default (state=initialState, action) => {
       console.log('GEOCODE REQUEST');
       return { ...state, isLoading: true};
     case GET_GEOCODE_SUCCESS:
-      console.log('geocode success');
-      return {...state, isLoading: false, ...action.payload};
+      console.log('geocode success reducer');
+      return {...state, isLoading: false, geocode: action.payload};
     case GET_GEOCODE_FAILED:
       console.log('grocodefaild');
       return {...state, isLoading: false, error: action.payload};

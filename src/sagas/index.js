@@ -1,4 +1,4 @@
-import { takeLatest, call, put, fork, all } from 'redux-saga/effects';
+import { takeLatest, take, select, call, put, fork, all } from 'redux-saga/effects';
 import { GET_INFO_REQUESTED,
           GET_INFO_SUCCESS,
           GET_GEOCODE,
@@ -11,21 +11,23 @@ import axios from 'axios';
 
 function* getGeocode(action) {
   try {
-    yield put({ type: GET_GEOCODE_REQUESTED })
+    yield put({ type: GET_GEOCODE_REQUESTED });
     const results = yield call(geocodeByAddress, action.payload);
     const { lat, lng } = yield call(getLatLng, results[0]);
-    const geocode = { lat, lng, name: action.payload }
-    yield put({type: GET_GEOCODE_SUCCESS, payload: geocode })
+    const geocode = { lat, lng, name: action.payload };
+    yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
+    console.log('geocode success getGeocode');
   } catch(error) {
     yield put({type: GET_GEOCODE_FAILED, payload: error })
   }
 }
 
-function gWeatherGeocode(place) {
+function fetchWeather(geocode) {
+  console.log(geocode);
   const key = '36ebef955f1b49690a2bdb5e20d565b8';
   const opt = 'mode=json&units=metric';
-  const lat = place.lat;
-  const lon = place.lng;
+  const lat = geocode.lat;
+  const lon = geocode.lng;
   const url = `https://api.openweathermap.org/data/2.5/forecast?${opt}&lat=${lat}&lon=${lon}&appid=${key}`;
   return axios.get(url).then( res => res );
 }
@@ -38,26 +40,28 @@ function gWeatherGeocode(place) {
 //   return axios.get(url).then( res => res )
 // }
 
+const selectGeocode = state => state.geocode.geocode;
 
-
-function* fetchAll(action) {
-  console.log('fetchAll');
-  console.log(action);
-  // yield fork(fetchWeather, action.payload);
+function* getInfo() {
+  console.log('fetchInfo');
+  yield take('GET_GEOCODE_SUCCESS');
+  const geocode = yield select(selectGeocode);
+  console.log('////////////////////////geocode', geocode);
+  yield fork(getWeather, geocode);
   // yield fork(fetchWeather2, action.payload);
   // yield fork(fetchWeather3, action.payload);
 }
 
 
 
-function* fetchWeather(place) {
-  yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: true, isError: false }});
+function* getWeather(geocode) {
+  // yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: true, isError: false }});
   console.log('weather');
-  console.log('place', place);
-  const weatherResult = yield call(gWeatherGeocode, place)
+  console.log('place', geocode);
+  const weatherResult = yield call(fetchWeather, geocode)
   const weather = { data: weatherResult, isLoading: false }
   // console.log('weather', weather.data.city.name, weather.data.city.country);
-  yield put({type: GET_INFO_SUCCESS, payload: { weather: weather, isLoading: false }});
+  yield put({type: GET_INFO_SUCCESS, payload: weather});
 }
 
 // function* fetchWeather2(place) {
@@ -75,7 +79,7 @@ function* fetchWeather(place) {
 //   yield put({type: GET_INFO_SUCCESS, payload: { weather3 }})
 // }
 
-function getCurrPosition() {
+function getUserPosition() {
   if (!navigator.geolocation){
     return;
   }
@@ -84,7 +88,7 @@ function getCurrPosition() {
       console.log('lat',position.coords.latitude,'lon', position.coords.longitude);
   }
 
-  const error = () => {
+  const error = (error) => {
       console.log('Unable to retrieve your location');
   }
 
@@ -96,8 +100,9 @@ function getCurrPosition() {
 function* rootSaga() {
   console.log('rootSaga');
   yield all([
-    fork(getCurrPosition),
-    takeLatest(GET_GEOCODE, getGeocode)
+    fork(getUserPosition),
+    takeLatest(GET_GEOCODE, getGeocode),
+    fork(getInfo)
   ]);
 }
 
