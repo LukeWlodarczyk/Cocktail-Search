@@ -2,25 +2,23 @@ import { GET_INFO_SUCCESS, GET_INFO_REQUESTED } from '../constants/action-types'
 
 
 const initialState = {
-  geocode: '',
   weather: {
+    stateName: 'weather',
     isLoading: false,
-    isError: false,
+    error: false,
     data: [],
   }
 }
 
 export default (state=initialState, action) => {
-  console.log('action',action);
-  console.log(state);
   switch (action.type) {
     case GET_INFO_REQUESTED:
       console.log('success');
-      return { ...state, isLoading: true};
+      return { ...state, };
 
     case GET_INFO_SUCCESS:
       console.log('success');
-      return {...state, isLoading: false, ...action.payload};
+      return {...state, };
     default:
       return state;
   }

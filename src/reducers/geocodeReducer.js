@@ -6,7 +6,7 @@ import { GET_GEOCODE_REQUESTED,
 const initialState = {
   geocode: '',
   isLoading: false,
-  isError: false
+  error: '',
 }
 
 export default (state=initialState, action) => {

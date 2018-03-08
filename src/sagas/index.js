@@ -1,26 +1,24 @@
-import { takeLatest, call, put, fork } from 'redux-saga/effects';
+import { takeLatest, call, put, fork, all } from 'redux-saga/effects';
 import { GET_INFO_REQUESTED,
           GET_INFO_SUCCESS,
-          GET_GEOCODE } from '../constants/action-types';
-import { getWeather, getWeather2, getWeather3 } from './apiCalls';
+          GET_GEOCODE,
+          GET_GEOCODE_REQUESTED,
+          GET_GEOCODE_SUCCESS,
+          GET_GEOCODE_FAILED
+        } from '../constants/action-types';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import axios from 'axios';
 
 function* getGeocode(action) {
-  // yield put({type: GET_GEOCODE_REQUESTED);
-  // geocodeByAddress(action.payload)
-  //   .then(results => getLatLng(results[0]))
-  //   .then(({ lat, lng }) => {
-  //       // yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
-  //       console.log(lat, lng);
-  //   })
-  //   .catch( e => {
-  //     // yield put({type: GET_GEOCODE_SUCCESS, payload: geocode})
-  //   } )
-
-  const results = yield call(geocodeByAddress, action.payload)
-  const { lat, lng } = yield call(getLatLng, results[0])
-  console.log(lat, lng);
+  try {
+    yield put({ type: GET_GEOCODE_REQUESTED })
+    const results = yield call(geocodeByAddress, action.payload);
+    const { lat, lng } = yield call(getLatLng, results[0]);
+    const geocode = { lat, lng, name: action.payload }
+    yield put({type: GET_GEOCODE_SUCCESS, payload: geocode })
+  } catch(error) {
+    yield put({type: GET_GEOCODE_FAILED, payload: error })
+  }
 }
 
 function gWeatherGeocode(place) {
@@ -45,7 +43,7 @@ function gWeatherGeocode(place) {
 function* fetchAll(action) {
   console.log('fetchAll');
   console.log(action);
-  yield fork(fetchWeather, action.payload);
+  // yield fork(fetchWeather, action.payload);
   // yield fork(fetchWeather2, action.payload);
   // yield fork(fetchWeather3, action.payload);
 }
@@ -77,12 +75,31 @@ function* fetchWeather(place) {
 //   yield put({type: GET_INFO_SUCCESS, payload: { weather3 }})
 // }
 
+function getCurrPosition() {
+  if (!navigator.geolocation){
+    return;
+  }
+
+  const success = (position) => {
+      console.log('lat',position.coords.latitude,'lon', position.coords.longitude);
+  }
+
+  const error = () => {
+      console.log('Unable to retrieve your location');
+  }
+
+
+  navigator.geolocation.getCurrentPosition(success, error)
+}
 
 
 
 function* rootSaga() {
   console.log('rootSaga');
-  yield takeLatest(GET_GEOCODE, getGeocode);
+  yield all([
+    fork(getCurrPosition),
+    takeLatest(GET_GEOCODE, getGeocode)
+  ]);
 }
 
 export default rootSaga;
