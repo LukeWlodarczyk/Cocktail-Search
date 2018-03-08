@@ -7,9 +7,10 @@ const initialState = {
 }
 
 export default (state=initialState, action) => {
-  console.log('action',action);
-  console.log('action.type',action.type);
-  console.log('action.payload', action.payload);
+  // console.log('action',action);
+  // console.log('action.type',action.type);
+  // console.log('action.payload', action.payload);
+  console.log(state);
   switch (action.type) {
     case GET_INFO_REQUESTED:
       console.log('success');

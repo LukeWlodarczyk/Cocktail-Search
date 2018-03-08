@@ -3,11 +3,11 @@ import React from 'react';
 const Header = () => {
   return (
     <header className='header'>
-      <p>Beer</p>
+      <p>Travel</p>
       <nav>
         <ul className='nav' >
           <li>
-            Faviurite
+            
           </li>
         </ul>
       </nav>
