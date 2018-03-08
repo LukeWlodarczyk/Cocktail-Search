@@ -51,13 +51,13 @@ function* fetchAll(action) {
 
 
 function* fetchWeather(place) {
-  yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: false, isError: false }});
+  yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: true, isError: false }});
   console.log('weather');
   console.log('place', place);
   const weatherResult = yield call(gWeatherGeocode, place)
   const weather = { data: weatherResult, isLoading: false }
   // console.log('weather', weather.data.city.name, weather.data.city.country);
-  yield put({type: GET_INFO_SUCCESS, payload: { weather: weather, isLoading: false, isError: false }});
+  yield put({type: GET_INFO_SUCCESS, payload: { weather: weather, isLoading: false }});
 }
 
 // function* fetchWeather2(place) {
@@ -87,7 +87,6 @@ function getCurrPosition() {
   const error = () => {
       console.log('Unable to retrieve your location');
   }
-
 
   navigator.geolocation.getCurrentPosition(success, error)
 }

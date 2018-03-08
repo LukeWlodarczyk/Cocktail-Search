@@ -19,7 +19,7 @@ export default (state=initialState, action) => {
     case GET_GEOCODE_SUCCESS:
       console.log('geocode success');
       return {...state, isLoading: false, ...action.payload};
-    case GET_GEOCODE_SUCCESS:
+    case GET_GEOCODE_FAILED:
       console.log('grocodefaild');
       return {...state, isLoading: false, error: action.payload};
     default:
