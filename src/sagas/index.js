@@ -1,9 +1,10 @@
 import { takeLatest, takeEvery, take, select, call, put, fork, all } from 'redux-saga/effects';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import { fetchWeather } from './apiCalls';
+import { fetchWeather, fetchWeather2 } from './apiCalls';
 import {
   GET_INFO_REQUESTED,
   GET_INFO_SUCCESS,
+  GET_INFO_FAILED,
   GET_GEOCODE,
   GET_GEOCODE_REQUESTED,
   GET_GEOCODE_SUCCESS,
@@ -31,15 +32,29 @@ function* getInfo() {
   // yield take('GET_GEOCODE_SUCCESS');
   const geocode = yield select(selectGeocode);
   yield fork(getWeather, geocode);
-  // yield fork(fetchWeather2, action.payload);
+  yield fork(getWeather2, geocode);
   // yield fork(fetchWeather3, action.payload);
 }
 
 
 function* getWeather(geocode) {
-  // yield put({type: GET_INFO_REQUESTED, payload: { isLoading: true, name: 'weather' } });
-  const weather = yield call(fetchWeather, geocode)
-  yield put({type: GET_INFO_SUCCESS, payload:{ weather }});
+  try {
+    yield put({type: GET_INFO_REQUESTED, loading: { weather: true} });
+    const weather = yield call(fetchWeather, geocode)
+    yield put({type: GET_INFO_SUCCESS, payload:{ weather }, loading: { weather: false }});
+  } catch (error) {
+    yield put({type: GET_INFO_FAILED, error:{ weather: error }, loading: { weather: false } });
+  }
+}
+
+function* getWeather2(geocode) {
+  try {
+    yield put({type: GET_INFO_REQUESTED, loading: { weather2: true } });
+    const weather2 = yield call(fetchWeather2, geocode)
+    yield put({type: GET_INFO_SUCCESS, payload:{ weather2 }, loading: { weather2: false }});
+  } catch (error) {
+    yield put({type: GET_INFO_FAILED, error:{ weather2: error }, loading: { weather: false }});
+  }
 }
 
 function userPositionPromised() {
