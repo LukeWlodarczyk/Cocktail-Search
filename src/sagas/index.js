@@ -1,13 +1,17 @@
-import { takeLatest, take, select, call, put, fork, all } from 'redux-saga/effects';
-import { GET_INFO_REQUESTED,
-          GET_INFO_SUCCESS,
-          GET_GEOCODE,
-          GET_GEOCODE_REQUESTED,
-          GET_GEOCODE_SUCCESS,
-          GET_GEOCODE_FAILED
-        } from '../constants/action-types';
+import { takeLatest, takeEvery, take, select, call, put, fork, all } from 'redux-saga/effects';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import axios from 'axios';
+import { fetchWeather } from './apiCalls';
+import {
+  GET_INFO_REQUESTED,
+  GET_INFO_SUCCESS,
+  GET_GEOCODE,
+  GET_GEOCODE_REQUESTED,
+  GET_GEOCODE_SUCCESS,
+  GET_GEOCODE_FAILED,
+  GET_LOCATION_REQUESTED,
+  GET_LOCATION_SUCCESS,
+  GET_LOCATION_FAILED
+} from '../constants/action-types';
 
 function* getGeocode(action) {
   try {
@@ -16,83 +20,53 @@ function* getGeocode(action) {
     const { lat, lng } = yield call(getLatLng, results[0]);
     const geocode = { lat, lng, name: action.payload };
     yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
-    console.log('geocode success getGeocode');
   } catch(error) {
     yield put({type: GET_GEOCODE_FAILED, payload: error })
   }
 }
 
-function fetchWeather(geocode) {
-  console.log(geocode);
-  const key = '36ebef955f1b49690a2bdb5e20d565b8';
-  const opt = 'mode=json&units=metric';
-  const lat = geocode.lat;
-  const lon = geocode.lng;
-  const url = `https://api.openweathermap.org/data/2.5/forecast?${opt}&lat=${lat}&lon=${lon}&appid=${key}`;
-  return axios.get(url).then( res => res );
-}
-
-// function gWeatherName(place) {
-//   const key = '36ebef955f1b49690a2bdb5e20d565b8'
-//   const name = place.name
-//   const url =
-//     `https://api.openweathermap.org/data/2.5/forecast?mode=json&units=metric&APPID=${key}&q=${name}`
-//   return axios.get(url).then( res => res )
-// }
-
 const selectGeocode = state => state.geocode.geocode;
 
 function* getInfo() {
-  console.log('fetchInfo');
-  yield take('GET_GEOCODE_SUCCESS');
+  // yield take('GET_GEOCODE_SUCCESS');
   const geocode = yield select(selectGeocode);
-  console.log('////////////////////////geocode', geocode);
   yield fork(getWeather, geocode);
   // yield fork(fetchWeather2, action.payload);
   // yield fork(fetchWeather3, action.payload);
 }
 
 
-
 function* getWeather(geocode) {
-  // yield put({type: GET_INFO_REQUESTED, payload: { weather: weather, isLoading: true, isError: false }});
-  console.log('weather');
-  console.log('place', geocode);
-  const weatherResult = yield call(fetchWeather, geocode)
-  const weather = { data: weatherResult, isLoading: false }
-  // console.log('weather', weather.data.city.name, weather.data.city.country);
-  yield put({type: GET_INFO_SUCCESS, payload: weather});
+  // yield put({type: GET_INFO_REQUESTED, payload: { isLoading: true, name: 'weather' } });
+  const weather = yield call(fetchWeather, geocode)
+  yield put({type: GET_INFO_SUCCESS, payload:{ weather }});
 }
 
-// function* fetchWeather2(place) {
-//   console.log('weather2');
-//   console.log('place', place);
-//   const weather2 = yield call(gWeatherName, place)
-//   console.log('weather2', weather2.data.city.name, weather2.data.city.country);
-//   yield put({type: GET_INFO_SUCCESS, payload: { weather2 }})
-// }
-
-// function* fetchWeather3(place) {
-//   console.log('weather3');
-//   const weather3 = yield call(getWeather3, place)
-//   console.log('///////////', weather3);
-//   yield put({type: GET_INFO_SUCCESS, payload: { weather3 }})
-// }
-
-function getUserPosition() {
-  if (!navigator.geolocation){
-    return;
+function userPositionPromised() {
+  const position = {}
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition (
+      location  => position.on({location}),
+      error     => position.on({error}),
+      { enableHighAccuracy: true }
+    )
   }
+  return { getLocation: () => new Promise(location => position.on = location) }
+}
 
-  const success = (position) => {
-      console.log('lat',position.coords.latitude,'lon', position.coords.longitude);
+function* getUserLocation() {
+  yield put({type: GET_LOCATION_REQUESTED});
+  const { getLocation } = yield call(userPositionPromised)
+  const { error, location } = yield call(getLocation)
+  if (error) {
+    console.log('Failed to get user position!', error)
+    const { message, code } = error;
+    yield put({type: GET_LOCATION_FAILED, payload: { code, message }});
+  } else {
+    console.log('Received User Location', location)
+    const { latitude: lat, longitude: lng } = location.coords;
+    yield put({type: GET_LOCATION_SUCCESS, payload: { lat, lng } });
   }
-
-  const error = (error) => {
-      console.log('Unable to retrieve your location');
-  }
-
-  navigator.geolocation.getCurrentPosition(success, error)
 }
 
 
@@ -100,9 +74,9 @@ function getUserPosition() {
 function* rootSaga() {
   console.log('rootSaga');
   yield all([
-    fork(getUserPosition),
+    fork(getUserLocation),
     takeLatest(GET_GEOCODE, getGeocode),
-    fork(getInfo)
+    takeLatest(GET_GEOCODE_SUCCESS, getInfo)
   ]);
 }
 
