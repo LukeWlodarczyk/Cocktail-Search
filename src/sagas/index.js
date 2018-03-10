@@ -1,6 +1,6 @@
 import { takeLatest, takeEvery, take, select, call, put, fork, all } from 'redux-saga/effects';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import { fetchWeather, fetchWeather2 } from './apiCalls';
+import { fetchWeather, fetchDistance, fetchUserPosition, fetchPlaces } from './apiCalls';
 import {
   GET_INFO_REQUESTED,
   GET_INFO_SUCCESS,
@@ -22,18 +22,9 @@ function* getGeocode(action) {
     const geocode = { lat, lng, name: action.payload };
     yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
   } catch(error) {
+    console.log('error', error);
     yield put({type: GET_GEOCODE_FAILED, payload: error })
   }
-}
-
-const selectGeocode = state => state.geocode.geocode;
-
-function* getInfo() {
-  // yield take('GET_GEOCODE_SUCCESS');
-  const geocode = yield select(selectGeocode);
-  yield fork(getWeather, geocode);
-  yield fork(getWeather2, geocode);
-  // yield fork(fetchWeather3, action.payload);
 }
 
 
@@ -47,15 +38,80 @@ function* getWeather(geocode) {
   }
 }
 
-function* getWeather2(geocode) {
+
+function* getDistance(geocode) {
   try {
-    yield put({type: GET_INFO_REQUESTED, loading: { weather2: true } });
-    const weather2 = yield call(fetchWeather2, geocode)
-    yield put({type: GET_INFO_SUCCESS, payload:{ weather2 }, loading: { weather2: false }});
+    yield put({type: GET_INFO_REQUESTED, loading: { distance: true } });
+    const location = yield select( state => state.userLocation.location);
+    console.log('location', location);
+    const distance = yield call(fetchDistance, geocode, location)
+    yield put({type: GET_INFO_SUCCESS, payload:{ distance }, loading: { distance: false }});
   } catch (error) {
-    yield put({type: GET_INFO_FAILED, error:{ weather2: error }, loading: { weather: false }});
+    yield put({type: GET_INFO_FAILED, error:{ distance: error }, loading: { distance: false }});
   }
 }
+
+function* getCafe(geocode) {
+  try {
+    yield put({type: GET_INFO_REQUESTED, loading: { cafe: true } });
+    const cafe = yield call(fetchPlaces, geocode, 'cafe')
+    yield put({type: GET_INFO_SUCCESS, payload:{ cafe }, loading: { cafe: false }});
+  } catch (error) {
+    yield put({type: GET_INFO_FAILED, error:{ cafe: error }, loading: { cafe: false }});
+  }
+}
+
+function* getRestaurants(geocode) {
+  try {
+    yield put({type: GET_INFO_REQUESTED, loading: { restaurants: true } });
+    const restaurants = yield call(fetchPlaces, geocode, 'shopping_mall')
+    yield put({type: GET_INFO_SUCCESS, payload:{ restaurants }, loading: { restaurants: false }});
+  } catch (error) {
+    yield put({type: GET_INFO_FAILED, error:{ restaurants: error }, loading: { restaurants: false }});
+  }
+}
+
+// var apiGeolocationSuccess = function(position) {
+//     alert("API geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+// };
+//
+// var tryAPIGeolocation = function() {
+//     jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyDCa1LUe1vOczX1hO_iGYgyo8p_jYuGOPU", function(success) {
+//         apiGeolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
+//   })
+//   .fail(function(err) {
+//     alert("API Geolocation error! \n\n"+err);
+//   });
+// };
+//
+// var browserGeolocationSuccess = function(position) {
+//     alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+// };
+//
+// var browserGeolocationFail = function(error) {
+//   switch (error.code) {
+//     case error.TIMEOUT:
+//       alert("Browser geolocation error !\n\nTimeout.");
+//       break;
+//     case error.PERMISSION_DENIED:
+//       if(error.message.indexOf("Only secure origins are allowed") == 0) {
+//         tryAPIGeolocation();
+//       }
+//       break;
+//     case error.POSITION_UNAVAILABLE:
+//       alert("Browser geolocation error !\n\nPosition unavailable.");
+//       break;
+//   }
+// };
+//
+// var tryGeolocation = function() {
+//   if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(
+//         browserGeolocationSuccess,
+//       browserGeolocationFail,
+//       {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true});
+//   }
+// };
 
 function userPositionPromised() {
   const position = {}
@@ -63,7 +119,7 @@ function userPositionPromised() {
     navigator.geolocation.getCurrentPosition (
       location  => position.on({location}),
       error     => position.on({error}),
-      { enableHighAccuracy: true }
+      { maximumAge: 50000, timeout: 20000, enableHighAccuracy: true }
     )
   }
   return { getLocation: () => new Promise(location => position.on = location) }
@@ -84,6 +140,17 @@ function* getUserLocation() {
   }
 }
 
+
+const selectGeocode = state => state.geocode.geocode;
+
+function* getInfo() {
+  // yield take('GET_GEOCODE_SUCCESS');
+  const geocode = yield select(selectGeocode);
+  yield fork(getWeather, geocode);
+  yield fork(getDistance, geocode);
+  yield fork(getCafe, geocode);
+  yield fork(getRestaurants, geocode);
+}
 
 
 function* rootSaga() {

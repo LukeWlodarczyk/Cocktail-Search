@@ -19,10 +19,18 @@ class Form extends Component {
     }
   }
 
+  displayForecast = () => {
+    const { weather } = this.props.info;
+      return (!!weather) ? <p>{weather.forecast}</p> : null;
+  };
+
   handleSubmit = (e) => {
     e.preventDefault();
     const { name } = this.state;
     this.props.getGeocode(name)
+    this.setState({
+      name: '',
+    })
   }
 
   handleChange = (name) => {
@@ -38,12 +46,6 @@ class Form extends Component {
     this.props.getGeocode(this.state.name)
   }
 
-
-  displayForecast = () => {
-    const { weather } = this.props.info;
-      return (!!weather) ? <p>{weather.forecast}</p> : null;
-  };
-
   renderSuggestion = ({ formattedSuggestion }) => (
     <div>
       <strong>{ formattedSuggestion.mainText }</strong>{' '}
@@ -54,6 +56,10 @@ class Form extends Component {
   onError = (status, clearSuggestions) => {
     console.log('Google Maps API returned error with status: ', status)
     clearSuggestions()
+  }
+
+  onFocus = () => {
+    console.log('focus');
   }
 
   shouldFetchSuggestions = ({ value }) => value.length > 0
@@ -92,6 +98,7 @@ class Form extends Component {
               inputProps={inputProps}
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
+              onFocus={this.onFocus}
               onSelect={this.handleSelect}
               onEnterKeyDown={this.handleEnter}
               onError={this.onError}

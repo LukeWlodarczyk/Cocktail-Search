@@ -7,14 +7,14 @@ import {
 
 const initialState = {
   weather: {},
-  weather2: {},
+  distance: {},
   loading: {
     weather: false,
-    weather2: false
+    distance: false
   },
   error: {
     weather: false,
-    weather2: false
+    distance: false
   }
 
 }
