@@ -22,7 +22,6 @@ function* getGeocode(action) {
     const geocode = { lat, lng, name: action.payload };
     yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
   } catch(error) {
-    console.log('error', error);
     yield put({type: GET_GEOCODE_FAILED, payload: error })
   }
 }
@@ -51,67 +50,15 @@ function* getDistance(geocode) {
   }
 }
 
-function* getCafe(geocode) {
+function* getPlaces(geocode, placeType) {
   try {
-    yield put({type: GET_INFO_REQUESTED, loading: { cafe: true } });
-    const cafe = yield call(fetchPlaces, geocode, 'cafe')
-    yield put({type: GET_INFO_SUCCESS, payload:{ cafe }, loading: { cafe: false }});
+    yield put({type: GET_INFO_REQUESTED, loading: { [placeType]: true } });
+    const data = yield call(fetchPlaces, geocode, placeType)
+    yield put({type: GET_INFO_SUCCESS, payload:{ [placeType]: data }, loading: { [placeType]: false }});
   } catch (error) {
-    yield put({type: GET_INFO_FAILED, error:{ cafe: error }, loading: { cafe: false }});
+    yield put({type: GET_INFO_FAILED, error:{ [placeType]: error }, loading: { [placeType]: false }});
   }
 }
-
-function* getRestaurants(geocode) {
-  try {
-    yield put({type: GET_INFO_REQUESTED, loading: { restaurants: true } });
-    const restaurants = yield call(fetchPlaces, geocode, 'shopping_mall')
-    yield put({type: GET_INFO_SUCCESS, payload:{ restaurants }, loading: { restaurants: false }});
-  } catch (error) {
-    yield put({type: GET_INFO_FAILED, error:{ restaurants: error }, loading: { restaurants: false }});
-  }
-}
-
-// var apiGeolocationSuccess = function(position) {
-//     alert("API geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
-// };
-//
-// var tryAPIGeolocation = function() {
-//     jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyDCa1LUe1vOczX1hO_iGYgyo8p_jYuGOPU", function(success) {
-//         apiGeolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
-//   })
-//   .fail(function(err) {
-//     alert("API Geolocation error! \n\n"+err);
-//   });
-// };
-//
-// var browserGeolocationSuccess = function(position) {
-//     alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
-// };
-//
-// var browserGeolocationFail = function(error) {
-//   switch (error.code) {
-//     case error.TIMEOUT:
-//       alert("Browser geolocation error !\n\nTimeout.");
-//       break;
-//     case error.PERMISSION_DENIED:
-//       if(error.message.indexOf("Only secure origins are allowed") == 0) {
-//         tryAPIGeolocation();
-//       }
-//       break;
-//     case error.POSITION_UNAVAILABLE:
-//       alert("Browser geolocation error !\n\nPosition unavailable.");
-//       break;
-//   }
-// };
-//
-// var tryGeolocation = function() {
-//   if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition(
-//         browserGeolocationSuccess,
-//       browserGeolocationFail,
-//       {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true});
-//   }
-// };
 
 function userPositionPromised() {
   const position = {}
@@ -119,7 +66,7 @@ function userPositionPromised() {
     navigator.geolocation.getCurrentPosition (
       location  => position.on({location}),
       error     => position.on({error}),
-      { maximumAge: 50000, timeout: 20000, enableHighAccuracy: true }
+      { maximumAge: 50000, timeout: 20000, enableHighAccuracy: false }
     )
   }
   return { getLocation: () => new Promise(location => position.on = location) }
@@ -141,15 +88,18 @@ function* getUserLocation() {
 }
 
 
-const selectGeocode = state => state.geocode.geocode;
-
 function* getInfo() {
-  // yield take('GET_GEOCODE_SUCCESS');
-  const geocode = yield select(selectGeocode);
+  const geocode = yield select(state => state.geocode.geocode);
   yield fork(getWeather, geocode);
   yield fork(getDistance, geocode);
-  yield fork(getCafe, geocode);
-  yield fork(getRestaurants, geocode);
+  yield fork(getPlaces, geocode, 'cafe');
+  yield fork(getPlaces, geocode, 'restaurant');
+  yield fork(getPlaces, geocode, 'bar');
+  yield fork(getPlaces, geocode, 'lodging');
+  yield fork(getPlaces, geocode, 'shopping_mall');
+  yield fork(getPlaces, geocode, 'rv_park');
+  yield fork(getPlaces, geocode, 'museum');
+  yield fork(getPlaces, geocode, 'night_club');
 }
 
 
