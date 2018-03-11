@@ -50,10 +50,10 @@ function* getDistance(geocode) {
   }
 }
 
-function* getPlaces(geocode, placeType) {
+function* getPlaces(geocode, placeType, query) {
   try {
     yield put({type: GET_INFO_REQUESTED, loading: { [placeType]: true } });
-    const data = yield call(fetchPlaces, geocode, placeType)
+    const data = yield call(fetchPlaces, geocode, placeType, query)
     yield put({type: GET_INFO_SUCCESS, payload:{ [placeType]: data }, loading: { [placeType]: false }});
   } catch (error) {
     yield put({type: GET_INFO_FAILED, error:{ [placeType]: error }, loading: { [placeType]: false }});
@@ -92,14 +92,14 @@ function* getInfo() {
   const geocode = yield select(state => state.geocode.geocode);
   yield fork(getWeather, geocode);
   yield fork(getDistance, geocode);
-  yield fork(getPlaces, geocode, 'cafe');
-  yield fork(getPlaces, geocode, 'restaurant');
-  yield fork(getPlaces, geocode, 'bar');
-  yield fork(getPlaces, geocode, 'lodging');
-  yield fork(getPlaces, geocode, 'shopping_mall');
-  yield fork(getPlaces, geocode, 'rv_park');
-  yield fork(getPlaces, geocode, 'museum');
-  yield fork(getPlaces, geocode, 'night_club');
+  yield fork(getPlaces, geocode, 'cafe', 'cafe');
+  yield fork(getPlaces, geocode, 'restaurant', 'restaurant');
+  yield fork(getPlaces, geocode, 'bar', 'bar');
+  yield fork(getPlaces, geocode, 'lodging', 'lodging, hotel');
+  yield fork(getPlaces, geocode, 'shopping_mall', 'shopping mall');
+  yield fork(getPlaces, geocode, 'rv_park', 'rv park');
+  yield fork(getPlaces, geocode, 'museum', 'museum');
+  yield fork(getPlaces, geocode, 'night_club', 'night club');
 }
 
 

@@ -19,10 +19,22 @@ export const fetchDistance = (geocode, userLocation) => {
   return axios.get(url).then( res => res.data );
 }
 
-export const fetchPlaces = (geocode, type, radius=15000) => {
+// export const fetchPlaces = (geocode, type, radius=15000) => {
+//   const key = 'AIzaSyDce84ZG6_2t-0_OMSO-XLA5WlXVqllOag';
+//   const lat = geocode.lat;
+//   const lon = geocode.lng;
+//   const url =  `https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&location=${lat},${lon}&radius=${radius}&type=${type}&key=${key}`
+//   return axios.get(url).then( res => res.data.results)
+// }
+
+
+export const fetchPlaces = (geocode, placeType, query, radius=15000) => {
   const key = 'AIzaSyDce84ZG6_2t-0_OMSO-XLA5WlXVqllOag';
   const lat = geocode.lat;
   const lon = geocode.lng;
-  const url =  `https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&location=${lat},${lon}&radius=${radius}&type=${type}&key=${key}`
+  const queryMod = query.split(', ').map( q => q.split(' ').join('+')).join('+')
+  console.log(queryMod);
+  const cors = 'https://cors-anywhere.herokuapp.com/';
+  const url =  `${cors}https://maps.googleapis.com/maps/api/place/textsearch/json?query=${queryMod}&location=${lat},${lon}&radius=${radius}&key=${key}`
   return axios.get(url).then( res => res.data.results)
 }
