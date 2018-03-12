@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import { getGeocode } from "../actions/index.js";
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-
 const mapStateToProps = state => {
   return {
       info: state.info
@@ -15,7 +14,7 @@ class Form extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
+      destination: '',
     }
   }
 
@@ -26,24 +25,24 @@ class Form extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { name } = this.state;
-    this.props.getGeocode(name)
+    const { destination } = this.state;
+    this.props.getGeocode(destination)
     this.setState({
-      name: '',
-    })
+      destination: '',
+    });
   }
 
-  handleChange = (name) => {
-    this.setState({ name })
+  handleChange = (destination) => {
+    this.setState({ destination })
   }
 
-  handleSelect = (name) => {
-    this.setState({ name })
+  handleSelect = (destination) => {
+    this.setState({ destination })
   }
 
-  handleEnter = (name) => {
-    this.setState({ name })
-    this.props.getGeocode(this.state.name)
+  handleEnter = (destination) => {
+    this.setState({ destination })
+    this.props.getGeocode(this.state.destination)
   }
 
   renderSuggestion = ({ formattedSuggestion }) => (
@@ -71,13 +70,24 @@ class Form extends Component {
       return 'Loading'
     }
 
-    const inputProps = {
-      value: this.state.name,
+    const destinationProps = {
+      value: this.state.destination,
+      name: 'destination',
       onChange: this.handleChange,
       type: 'search',
       placeholder: 'Search Places...',
       autoFocus: true,
     }
+
+    const userLocationProps = {
+      value: this.state.userLocation,
+      name: 'userLocation',
+      onChange: this.handleChange,
+      type: 'search',
+      placeholder: 'Search Places...',
+      autoFocus: true,
+    }
+
 
 
     // const options = {
@@ -95,7 +105,17 @@ class Form extends Component {
 
           <form onSubmit={this.handleSubmit}>
             <PlacesAutocomplete
-              inputProps={inputProps}
+              inputProps={destinationProps}
+              renderSuggestion={this.renderSuggestion}
+              shouldFetchSuggestions={this.shouldFetchSuggestions}
+              onFocus={this.onFocus}
+              onSelect={this.handleSelect}
+              onEnterKeyDown={this.handleEnter}
+              onError={this.onError}
+              options={options}
+            />
+            <PlacesAutocomplete
+              inputProps={userLocationProps}
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
               onFocus={this.onFocus}
@@ -105,7 +125,6 @@ class Form extends Component {
               options={options}
             />
             <input type='submit' value='Search'/>
-            {this.displayForecast() ||  <p>Loading</p>}
           </form>
 
       )
