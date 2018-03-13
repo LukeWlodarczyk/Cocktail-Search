@@ -4,13 +4,7 @@ import PropTypes from "prop-types";
 import { getGeocode } from "../actions/index.js";
 import PlacesAutocomplete from 'react-places-autocomplete';
 
-const mapStateToProps = state => {
-  return {
-      info: state.info
-   };
-};
-
-class Form extends Component {
+class PlacesAutocompleteForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -88,13 +82,11 @@ class Form extends Component {
       placeholder: 'Type in travel destination...',
     }
 
-
-
-    // const options = {
-    //   location: new google.maps.LatLng(-34, 151),
-    //   radius: 2000,
-    //   types: ['address']
-    // }
+    const cssClasses = {
+      root: 'form-group',
+      input: 'form-control',
+      autocompleteContainer: 'my-autocomplete-container'
+    }
 
     const options = {
       types: ['(cities)'],
@@ -102,10 +94,10 @@ class Form extends Component {
     }
 
     return (
-
-          <form onSubmit={this.handleSubmit}>
+          <form className='form' onSubmit={this.handleSubmit}>
             <PlacesAutocomplete
               inputProps={destinationProps}
+              classNames={cssClasses}
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
               onFocus={this.onFocus}
@@ -116,6 +108,7 @@ class Form extends Component {
             />
             <PlacesAutocomplete
               inputProps={userLocationProps}
+              classNames={cssClasses}
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
               onFocus={this.onFocus}
@@ -124,17 +117,12 @@ class Form extends Component {
               onError={this.onError}
               options={options}
             />
-            <input type='submit' value='Search'/>
+            <input className='btn-search' type='submit' value='Search'/>
           </form>
-
       )
   }
 }
 
-const Form1 = connect(mapStateToProps, { getGeocode })(Form);
+const Form = connect(null, { getGeocode })(PlacesAutocompleteForm);
 
-Form1.propTypes = {
-
-};
-
-export default Form1;
+export default Form;

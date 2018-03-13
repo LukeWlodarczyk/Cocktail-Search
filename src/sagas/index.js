@@ -64,14 +64,14 @@ function* getInfo() {
   const { destination: dest } = geocode;
   yield fork(getWeather, dest);
   yield fork(getDistance, geocode);
-  yield fork(getPlaces, dest, 'cafe', 'cafe');
-  yield fork(getPlaces, dest, 'restaurant', 'restaurant');
-  yield fork(getPlaces, dest, 'bar', 'bar');
-  yield fork(getPlaces, dest, 'lodging', 'lodging, hotel');
-  yield fork(getPlaces, dest, 'shopping_mall', 'shopping mall');
-  yield fork(getPlaces, dest, 'rv_park', 'rv park');
-  yield fork(getPlaces, dest, 'museum', 'museum');
-  yield fork(getPlaces, dest, 'night_club', 'night club');
+  // yield fork(getPlaces, dest, 'cafe', 'cafe');
+  // yield fork(getPlaces, dest, 'restaurant', 'restaurant');
+  // yield fork(getPlaces, dest, 'bar', 'bar');
+  // yield fork(getPlaces, dest, 'lodging', 'lodging, hotel');
+  // yield fork(getPlaces, dest, 'shopping_mall', 'shopping mall');
+  // yield fork(getPlaces, dest, 'rv_park', 'rv park');
+  // yield fork(getPlaces, dest, 'museum', 'museum');
+  // yield fork(getPlaces, dest, 'night_club', 'night club');
 }
 
 

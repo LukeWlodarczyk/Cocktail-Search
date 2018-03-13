@@ -15,7 +15,7 @@ const initialState = {
 export default (state=initialState, action) => {
   switch (action.type) {
     case GET_GEOCODE_REQUESTED:
-      return { ...state, isLoading: true};
+      return { ...state, isLoading: true, error: ''};
     case GET_GEOCODE_SUCCESS:
       return {
         ...state,

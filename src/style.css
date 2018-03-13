@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.form {
+  width: 100%;
+  max-width: 500px;
+  min-width: 200px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.form-group {
+  width: 200px;
+}
+
+.form-control {
+  padding: .4em;
+  margin: .2em;
+}
+
+.btn-search {
+  padding: .4em;
+  margin: .2em;
+  align-self: flex-start;
+  background: none;
+  border: 1px solid black;
+}
