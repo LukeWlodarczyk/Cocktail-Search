@@ -20,7 +20,6 @@ const initialState = {
 }
 
 export default (state=initialState, action) => {
-  console.log(state);
   switch (action.type) {
     case GET_INFO_REQUESTED:
       console.log('request');

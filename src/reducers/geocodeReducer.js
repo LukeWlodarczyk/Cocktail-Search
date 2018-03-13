@@ -6,7 +6,8 @@ import {
 
 
 const initialState = {
-  geocode: {},
+  userLocation: {},
+  destination: {},
   isLoading: false,
   error: '',
 }
@@ -16,7 +17,12 @@ export default (state=initialState, action) => {
     case GET_GEOCODE_REQUESTED:
       return { ...state, isLoading: true};
     case GET_GEOCODE_SUCCESS:
-      return {...state, isLoading: false, geocode: action.payload};
+      return {
+        ...state,
+        isLoading: false,
+        userLocation: action.payload.userLoc,
+        destination: action.payload.dest
+      };
     case GET_GEOCODE_FAILED:
       return {...state, isLoading: false, error: action.payload};
     default:

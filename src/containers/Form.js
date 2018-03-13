@@ -14,35 +14,46 @@ class Form extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      userLocation: '',
       destination: '',
     }
   }
 
-  displayForecast = () => {
-    const { weather } = this.props.info;
-      return (!!weather) ? <p>{weather.forecast}</p> : null;
-  };
+  handleChangeUserLoc = (userLocation) => {
+    this.setState({ userLocation })
+  }
+
+  handleSelectUserLoc = (userLocation) => {
+    this.setState({ userLocation })
+  }
+
+  handleEnterUserLoc = (userLocation) => {
+    this.setState({ userLocation })
+  }
+
+  handleChangeDest = (destination) => {
+    this.setState({ destination })
+  }
+
+  handleSelectDest = (destination) => {
+    this.setState({ destination })
+  }
+
+  handleEnterDest = (destination) => {
+    this.setState({ destination })
+  }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { destination } = this.state;
-    this.props.getGeocode(destination)
+    console.log(this.state);
+    const { destination, userLocation } = this.state;
+    const locations = this.state;
+    console.log('//////////////////',locations);
+    this.props.getGeocode(locations)
     this.setState({
       destination: '',
+      userLocation: '',
     });
-  }
-
-  handleChange = (destination) => {
-    this.setState({ destination })
-  }
-
-  handleSelect = (destination) => {
-    this.setState({ destination })
-  }
-
-  handleEnter = (destination) => {
-    this.setState({ destination })
-    this.props.getGeocode(this.state.destination)
   }
 
   renderSuggestion = ({ formattedSuggestion }) => (
@@ -64,28 +75,20 @@ class Form extends Component {
   shouldFetchSuggestions = ({ value }) => value.length > 0
 
   render() {
-    const { weather } = this.props.info;
-    if(this.props.info.isLoading) {
-      console.log(this.props.info);
-      return 'Loading'
-    }
 
     const destinationProps = {
       value: this.state.destination,
-      name: 'destination',
-      onChange: this.handleChange,
+      onChange: this.handleChangeDest,
       type: 'search',
-      placeholder: 'Search Places...',
+      placeholder: 'Type in your location...',
       autoFocus: true,
     }
 
     const userLocationProps = {
       value: this.state.userLocation,
-      name: 'userLocation',
-      onChange: this.handleChange,
+      onChange: this.handleChangeUserLoc,
       type: 'search',
-      placeholder: 'Search Places...',
-      autoFocus: true,
+      placeholder: 'Type in travel destination...',
     }
 
 
@@ -109,8 +112,8 @@ class Form extends Component {
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
               onFocus={this.onFocus}
-              onSelect={this.handleSelect}
-              onEnterKeyDown={this.handleEnter}
+              onSelect={this.handleSelectDest}
+              onEnterKeyDown={this.handleEnterDest}
               onError={this.onError}
               options={options}
             />
@@ -119,8 +122,8 @@ class Form extends Component {
               renderSuggestion={this.renderSuggestion}
               shouldFetchSuggestions={this.shouldFetchSuggestions}
               onFocus={this.onFocus}
-              onSelect={this.handleSelect}
-              onEnterKeyDown={this.handleEnter}
+              onSelect={this.handleSelectUserLoc}
+              onEnterKeyDown={this.handleEnterUserLoc}
               onError={this.onError}
               options={options}
             />

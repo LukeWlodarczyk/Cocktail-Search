@@ -15,12 +15,16 @@ import {
 } from '../constants/action-types';
 
 function* getGeocode(action) {
+  console.log(action);
   try {
     yield put({ type: GET_GEOCODE_REQUESTED });
-    const results = yield call(geocodeByAddress, action.payload);
-    const { lat, lng } = yield call(getLatLng, results[0]);
-    const geocode = { lat, lng, name: action.payload };
-    yield put({type: GET_GEOCODE_SUCCESS, payload: geocode });
+    const destResult = yield call(geocodeByAddress, action.payload.destination);
+    const userLocResult = yield call(geocodeByAddress, action.payload.userLocation);
+    const dest = yield call(getLatLng, destResult[0]);
+    const userLoc = yield call(getLatLng, userLocResult[0]);
+    const geocodeDest = { ...dest, name: action.payload.destination };
+    const geocodeUserLoc = { ...userLoc, name: action.payload.userLocation };
+    yield put({type: GET_GEOCODE_SUCCESS, payload: { dest: geocodeDest, userLoc: geocodeUserLoc }});
   } catch(error) {
     yield put({type: GET_GEOCODE_FAILED, payload: error })
   }
@@ -40,10 +44,9 @@ function* getWeather(geocode) {
 
 function* getDistance(geocode) {
   try {
+    const { destination, userLocation } = geocode;
     yield put({type: GET_INFO_REQUESTED, loading: { distance: true } });
-    const location = yield select( state => state.userLocation.location);
-    console.log('location', location);
-    const distance = yield call(fetchDistance, geocode, location)
+    const distance = yield call(fetchDistance, userLocation, destination)
     yield put({type: GET_INFO_SUCCESS, payload:{ distance }, loading: { distance: false }});
   } catch (error) {
     yield put({type: GET_INFO_FAILED, error:{ distance: error }, loading: { distance: false }});
@@ -60,53 +63,24 @@ function* getPlaces(geocode, placeType, query) {
   }
 }
 
-function userPositionPromised() {
-  const position = {}
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition (
-      location  => position.on({location}),
-      error     => position.on({error}),
-      { maximumAge: 50000, timeout: 20000, enableHighAccuracy: false }
-    )
-  }
-  return { getLocation: () => new Promise(location => position.on = location) }
-}
-
-function* getUserLocation() {
-  yield put({type: GET_LOCATION_REQUESTED});
-  const { getLocation } = yield call(userPositionPromised)
-  const { error, location } = yield call(getLocation)
-  if (error) {
-    console.log('Failed to get user position!', error)
-    const { message, code } = error;
-    yield put({type: GET_LOCATION_FAILED, payload: { code, message }});
-  } else {
-    console.log('Received User Location', location)
-    const { latitude: lat, longitude: lng } = location.coords;
-    yield put({type: GET_LOCATION_SUCCESS, payload: { lat, lng } });
-  }
-}
-
-
 function* getInfo() {
-  const geocode = yield select(state => state.geocode.geocode);
-  yield fork(getWeather, geocode);
+  const geocode = yield select(state => state.geocode);
+  const { destination: dest } = geocode;
+  yield fork(getWeather, dest);
   yield fork(getDistance, geocode);
-  yield fork(getPlaces, geocode, 'cafe', 'cafe');
-  yield fork(getPlaces, geocode, 'restaurant', 'restaurant');
-  yield fork(getPlaces, geocode, 'bar', 'bar');
-  yield fork(getPlaces, geocode, 'lodging', 'lodging, hotel');
-  yield fork(getPlaces, geocode, 'shopping_mall', 'shopping mall');
-  yield fork(getPlaces, geocode, 'rv_park', 'rv park');
-  yield fork(getPlaces, geocode, 'museum', 'museum');
-  yield fork(getPlaces, geocode, 'night_club', 'night club');
+  yield fork(getPlaces, dest, 'cafe', 'cafe');
+  yield fork(getPlaces, dest, 'restaurant', 'restaurant');
+  yield fork(getPlaces, dest, 'bar', 'bar');
+  yield fork(getPlaces, dest, 'lodging', 'lodging, hotel');
+  yield fork(getPlaces, dest, 'shopping_mall', 'shopping mall');
+  yield fork(getPlaces, dest, 'rv_park', 'rv park');
+  yield fork(getPlaces, dest, 'museum', 'museum');
+  yield fork(getPlaces, dest, 'night_club', 'night club');
 }
 
 
 function* rootSaga() {
-  console.log('rootSaga');
   yield all([
-    fork(getUserLocation),
     takeLatest(GET_GEOCODE, getGeocode),
     takeLatest(GET_GEOCODE_SUCCESS, getInfo)
   ]);
