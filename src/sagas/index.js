@@ -8,14 +8,10 @@ import {
   GET_GEOCODE,
   GET_GEOCODE_REQUESTED,
   GET_GEOCODE_SUCCESS,
-  GET_GEOCODE_FAILED,
-  GET_LOCATION_REQUESTED,
-  GET_LOCATION_SUCCESS,
-  GET_LOCATION_FAILED
+  GET_GEOCODE_FAILED
 } from '../constants/action-types';
 
 function* getGeocode(action) {
-  console.log(action);
   try {
     yield put({ type: GET_GEOCODE_REQUESTED });
     const destResult = yield call(geocodeByAddress, action.payload.destination);
@@ -53,10 +49,10 @@ function* getDistance(geocode) {
   }
 }
 
-function* getPlaces(geocode, placeType, query) {
+function* getPlaces(dest, placeType, query) {
   try {
     yield put({type: GET_INFO_REQUESTED, loading: { [placeType]: true } });
-    const data = yield call(fetchPlaces, geocode, placeType, query)
+    const data = yield call(fetchPlaces, dest, placeType, query)
     yield put({type: GET_INFO_SUCCESS, payload:{ [placeType]: data }, loading: { [placeType]: false }});
   } catch (error) {
     yield put({type: GET_INFO_FAILED, error:{ [placeType]: error }, loading: { [placeType]: false }});

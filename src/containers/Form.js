@@ -45,10 +45,7 @@ class Form extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log(this.state);
-    const { destination, userLocation } = this.state;
     const locations = this.state;
-    console.log('//////////////////',locations);
     this.props.getGeocode(locations)
     this.setState({
       destination: '',
