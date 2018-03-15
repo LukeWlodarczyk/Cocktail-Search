@@ -15,7 +15,6 @@ export const fetchDistance = (dest, userLocation) => {
   const origins = `${dest.lat},${dest.lng}`;
   const destinations = `${userLocation.lat},${userLocation.lng}`
   const url =  `https://crossorigin.me/https://maps.googleapis.com/maps/api/distancematrix/${opt}&origins=${origins}&destinations=${destinations}&key=${key}`
-  console.log('url', url);
   return axios.get(url).then( res => res.data );
 }
 

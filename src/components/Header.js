@@ -4,8 +4,6 @@ const Header = () => {
   return (
     <header className='header'>
       <p>Travel</p>
-      <nav>
-      </nav>
     </header>
   )
 }

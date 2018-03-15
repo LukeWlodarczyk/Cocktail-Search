@@ -1,6 +1,6 @@
-import { takeLatest, takeEvery, take, select, call, put, fork, all } from 'redux-saga/effects';
+import { takeLatest, select, call, put, fork, all } from 'redux-saga/effects';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import { fetchWeather, fetchDistance, fetchUserPosition, fetchPlaces } from './apiCalls';
+import { fetchWeather, fetchDistance, fetchPlaces } from './apiCalls';
 import {
   GET_INFO_REQUESTED,
   GET_INFO_SUCCESS,

@@ -13,8 +13,8 @@ const initialState = {
     distance: false
   },
   error: {
-    weather: false,
-    distance: false
+    weather: '',
+    distance: ''
   }
 
 }
