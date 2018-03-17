@@ -29,7 +29,7 @@ function* getGeocode(action) {
 
 function* getWeather(geocode) {
   try {
-    yield put({type: GET_INFO_REQUESTED, loading: { weather: true} }, error:{ weather: null });
+    yield put({type: GET_INFO_REQUESTED, loading: { weather: true}, error: { weather: null } });
     const weather = yield call(fetchWeather, geocode)
     yield put({type: GET_INFO_SUCCESS, payload: { weather }, loading: { weather: false }});
   } catch (error) {
@@ -51,7 +51,7 @@ function* getDistance(geocode) {
 
 function* getPlaces(dest, placeType, query) {
   try {
-    yield put({type: GET_INFO_REQUESTED, loading: { [placeType]: true } }, error:{ [placeType]: null });
+    yield put({type: GET_INFO_REQUESTED, loading: { [placeType]: true }, error:{ [placeType]: null } });
     const data = yield call(fetchPlaces, dest, placeType, query)
     yield put({type: GET_INFO_SUCCESS, payload:{ [placeType]: data }, loading: { [placeType]: false }});
   } catch (error) {
