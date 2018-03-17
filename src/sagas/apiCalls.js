@@ -45,6 +45,22 @@ export const fetchPlaces = (geocode, placeType, query, radius=5000) => {
   const queryMod = query.split(', ').map( q => q.split(' ').join('+')).join('+');
   console.log(queryMod);
   const cors = 'https://cors-anywhere.herokuapp.com/';
-  const url =  `${cors}https://maps.googleapis.com/maps/api/place/textsearch/json?query=${queryMod}&type=${placeType}&location=${lat},${lon}&radius=${radius}&key=${key}`
-  return axios.get(url).then( res => res.data.results)
+  const url =  `${cors}https://maps.googleapis.com/maps/api/place/textsearch/json?query=${queryMod}&type=${placeType}&location=${lat},${lon}&radius=${radius}&limit=5&key=${key}`
+  return axios.get(url).then( res => {
+
+    console.log(res);
+    const placesData = res.data.results.filter( p => !!p.photos).slice(0, 6).map( p => (
+      {
+        name: p.name,
+        address: p.formatted_address,
+        photoReference: p.photos[0].photo_reference,
+        rating: p.rating
+      }
+    ));
+
+    console.log(placesData);
+
+
+    return placesData
+  })
 }
