@@ -7,14 +7,17 @@ import {
 
 const initialState = {
   weather: {},
-  distance: {},
+  distance: {
+    distance: '',
+    duration: ''
+  },
   loading: {
     weather: false,
     distance: false
   },
   error: {
-    weather: '',
-    distance: ''
+    weather: null,
+    distance: null
   }
 
 }
@@ -25,7 +28,8 @@ export default (state=initialState, action) => {
       console.log('request');
       return {
               ...state,
-              loading: { ...state.loading, ...action.loading}
+              loading: { ...state.loading, ...action.loading },
+              error: { ...state.error, ...action.error }
             };
     case GET_INFO_SUCCESS:
       console.log('success');
@@ -36,6 +40,7 @@ export default (state=initialState, action) => {
             };
     case GET_INFO_FAILED:
       console.log('fail');
+      console.log(action.error);
       return {
               ...state,
               error: { ...state.error, ...action.error },
