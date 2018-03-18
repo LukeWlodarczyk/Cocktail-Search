@@ -9,15 +9,26 @@ const initialState = {
   weather: {},
   distance: {
     distance: '',
-    duration: ''
+    duration: '',
   },
+  cafe: {},
+  lodging: {},
+  shopping_mall: {},
   loading: {
     weather: false,
-    distance: false
+    distance: false,
+    cafe: false,
+    lodging: false,
+    shopping_mall: false,
+    museum: false,
   },
   error: {
     weather: null,
-    distance: null
+    distance: null,
+    cafe: null,
+    lodging: null,
+    shopping_mall: null,
+    museum: null,
   }
 
 }
