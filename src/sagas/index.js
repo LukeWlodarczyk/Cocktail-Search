@@ -64,7 +64,7 @@ function* getInfo() {
   const { destination: dest } = geocode;
   yield fork(getWeather, dest);
   yield fork(getDistance, geocode);
-  yield fork(getPlaces, dest, 'cafe', 'cafe');
+  // yield fork(getPlaces, dest, 'cafe', 'cafe');
   // yield fork(getPlaces, dest, 'restaurant', 'restaurant');
   // yield fork(getPlaces, dest, 'bar', 'bar');
   // yield fork(getPlaces, dest, 'lodging', 'lodging, hotel');

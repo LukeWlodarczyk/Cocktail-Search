@@ -7,13 +7,11 @@ import {
 
 const initialState = {
   weather: {},
-  distance: {
-    distance: '',
-    duration: '',
-  },
+  distance: {},
   cafe: {},
   lodging: {},
   shopping_mall: {},
+  museum: {},
   loading: {
     weather: false,
     distance: false,
